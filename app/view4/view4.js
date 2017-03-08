@@ -23,7 +23,6 @@ angular.module('myApp.view4', ['ngRoute'])
         width = 50;
         curX = 50;
         spacing = 2;
-        base = 200;
 
         ctx.fillStyle = '#d8838e';
 

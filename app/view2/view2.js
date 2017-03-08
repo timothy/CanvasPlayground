@@ -17,7 +17,6 @@ angular.module('myApp.view2', ['ngRoute'])
         var width = 50;
         var currX = 50;
         var spacing = 2;
-        var base = 200;
 
         ctx.fillStyle = '#d8838e';
 

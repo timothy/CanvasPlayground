@@ -22,7 +22,6 @@ angular.module('myApp.view3', ['ngRoute'])
         var width = 50;
         var currX = 50;
         var spacing = 2;
-        var base = 200;
 
         ctx.fillStyle = '#d8838e';
 
@@ -50,6 +49,7 @@ angular.module('myApp.view3', ['ngRoute'])
          //(x,y,redius, startAngle, endAngle, antiClockwise)
          ctx.arc(300,100,80, 2 * Math.PI, false);
          ctx.fill();*/
+/*
 var canvas = $('#testCanvas')[0];//document.getElementById('testCanvas');
 var ctx = canvas.getContext('2d');
 
@@ -72,4 +72,4 @@ for (var i = 0; i < scores.length; i++) {
     ctx.fillRect(currX, 0, width, scores[i]);//(x,y,width, height)// now that it is rendering from the "Bottom" the y coordinate can be 0 instead of "canvas.height - scores[i]"
 
     currX += width + space;
-}
+}*/
