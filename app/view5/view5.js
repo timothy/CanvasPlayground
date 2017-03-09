@@ -3,18 +3,18 @@
  */
 
 'use strict';
-var moduleName = "view5";// I got lazy...
-angular.module('myApp.' + moduleName, ['ngRoute'])
+var moduleName5 = "view5";// TODO -  need to find a better way to quickly do this...
+angular.module('myApp.' + moduleName5, ['ngRoute'])
 
     .config(['$routeProvider', function ($routeProvider) {
-        $routeProvider.when('/' + moduleName, {
-            templateUrl: moduleName + '/' + moduleName + '.html',
-            controller: moduleName + 'Ctrl'
+        $routeProvider.when('/' + moduleName5, {
+            templateUrl: moduleName5 + '/' + moduleName5 + '.html',
+            controller: moduleName5 + 'Ctrl'
         });
     }])
 
-    .controller(moduleName + 'Ctrl', [function () {
-        var canvas, ctx, scores, width, curBarHeight, curX, curY, startX = 0, startY = 0, curLineX,cirLineWidth = 5, spacing, base, i, l;
+    .controller(moduleName5 + 'Ctrl', [function () {
+        var canvas, ctx, scores, width, curBarHeight, curX, curY, startX = 0, startY = 0, curLineX,cirLineWidth = 5, spacing, i, l;
 
         canvas = $('#testCanvas3')[0];//document.getElementById('testCanvas');
         ctx = canvas.getContext('2d');
