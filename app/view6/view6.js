@@ -3,6 +3,8 @@
  */
 
 'use strict';
+(function(){
+
 var moduleName = "view6";// I got lazy...
 angular.module('myApp.' + moduleName, ['ngRoute'])
 
@@ -44,3 +46,4 @@ angular.module('myApp.' + moduleName, ['ngRoute'])
         }
 
     }]);
+})();
