@@ -23,7 +23,7 @@ angular.module('myApp.view1', ['ngRoute'])
 
 
         ctx.fillStyle = 'orange';
-//(x,y,redius, startAngle, endAngle, antiClockwise)
+        //(x,y,redius, startAngle, endAngle, antiClockwise)
         ctx.arc(300, 100, 80, 2 * Math.PI, false);
         ctx.fill();
 
