@@ -3,6 +3,7 @@
  */
 
 'use strict';
+//self invoking function
 (function(){
 
 var moduleName = "view6";// I got lazy...
