@@ -107,10 +107,11 @@ angular.module('myApp.view2', ['ngRoute'])
 
         /**
          * This will format the time according to the graph specification.
-         * @param time
-         * @returns {*}
+         * @param time {number} military time.
+         * @returns {string} Formatted time string.
          */
         function timeFormat(time) {
+            time = Number(time);//it is really important that this be a number and not a string that holds a number...
             if (time > 1259) {
                 return (time - 1200).toString().substring(0, 2) + " PM"
             }
