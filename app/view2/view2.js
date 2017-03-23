@@ -14,10 +14,10 @@ angular.module('myApp.view2', ['ngRoute'])
         canvas.width = window.innerWidth - 100;
 
         //style variables
-        var margin = {top: 10, left: 10, right: 10, bottom: 10};
+        var margin = {top: 10, left: 10, right: 10, bottom: 20};
 
         var maxCanvasHeight = canvas.height - (Number(margin.top) + Number(margin.bottom)) - 15,//Offset by 15
-            maxCanvasWidth = canvas.width - (margin.left + margin.right) - 15;//Offset by 15
+            maxCanvasWidth = canvas.width - (margin.left + margin.right) - 30;//Offset by 15
 
         //Set up all variable.
         var ctx = canvas.getContext('2d'),
@@ -27,6 +27,7 @@ angular.module('myApp.view2', ['ngRoute'])
             currX = margin.left,// start at margin boarder
             spacing = 2,
             lineHeight = 10,
+            count = 0,
             i;// this should only be used for loops...
 
         var maxBarHeight = getMaxChartValue(curUsage);
@@ -45,6 +46,22 @@ angular.module('myApp.view2', ['ngRoute'])
             ctx.moveTo(currX, canvas.height - margin.bottom);
             ctx.lineTo(currX, canvas.height - lineHeight - margin.bottom);
             ctx.stroke();
+        }
+
+        /**
+         *
+         * @param textTime
+         */
+        function renderTimes() {//todo Needs more work...
+            ctx.fillStyle = 'white';
+            var curSpacing = currX/4;
+            currX = margin.left;
+            ctx.font = ".8em Arial";
+            var l = curUsage.length;
+            for (i = 0; i < l; i++) {
+                ctx.fillText(timeFormat(curUsage[i].time), currX, canvas.height);
+                currX += curSpacing;
+            }
         }
 
         /**
@@ -71,14 +88,10 @@ angular.module('myApp.view2', ['ngRoute'])
                 barY = (canvas.height - barHight) - margin.bottom - lineHeight;//tried to make this easier to read
                 ctx.fillRect(currX, barY, barWidth, barHight);
                 renderLines();
+                //renderTimes(timeFormat(curUsage[i].time));
                 currX += barWidth + spacing;
             }
             renderLines();
-        }
-
-        function renderTimes(text) {
-            ctx.font = "30px Arial";
-            ctx.fillText("Hello World", 10, 50);
         }
 
 
@@ -88,6 +101,7 @@ angular.module('myApp.view2', ['ngRoute'])
         !function renderAll() {
             renderBars();
             renderLineConnectors();
+            renderTimes();
         }();
 
 
@@ -112,7 +126,11 @@ angular.module('myApp.view2', ['ngRoute'])
          */
         function timeFormat(time) {
             time = Number(time);//it is really important that this be a number and not a string that holds a number...
-            if (time > 1259) {
+            if (time > 1259 && time < 2200) {
+                return (time - 1200).toString().substring(0, 1) + " PM"
+            }
+
+            if (time >= 2200) {
                 return (time - 1200).toString().substring(0, 2) + " PM"
             }
 

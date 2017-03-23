@@ -25,6 +25,14 @@ angular.module('myApp', [
                 "date": 1490155200000,
                 "data": [
                     {
+                        "time": 701,
+                        "usage": 8000
+                    },
+                    {
+                        "time": 801,
+                        "usage": 7500
+                    },
+                    {
                         "time": 901,
                         "usage": 7000
                     },
@@ -55,6 +63,30 @@ angular.module('myApp', [
                     {
                         "time": 1601,
                         "usage": 7500
+                    },
+                    {
+                        "time": 1801,
+                        "usage": 7000
+                    },
+                    {
+                        "time": 1901,
+                        "usage": 2000
+                    },
+                    {
+                        "time": 2001,
+                        "usage": 4000
+                    },
+                    {
+                        "time": 2101,
+                        "usage": 3000
+                    },
+                    {
+                        "time": 2201,
+                        "usage": 5000
+                    },
+                    {
+                        "time": 2301,
+                        "usage": 9000
                     }
                 ]
             },
