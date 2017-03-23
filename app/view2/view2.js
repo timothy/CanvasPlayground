@@ -9,23 +9,31 @@ angular.module('myApp.view2', ['ngRoute'])
         });
     }])
 
-    .controller('View2Ctrl', ['usage',function (usage) {
+    .controller('View2Ctrl', ['usage', function (usage) {
         var canvas = $('#testCanvas')[0];//document.getElementById('testCanvas');
         canvas.width = window.innerWidth - 100;
-        var ctx = canvas.getContext('2d');
 
-        var curUsage = usage.coffeeShop[0].data;
+        //style variables
+        var margin = {top: 10, left: 10, right: 10, bottom: 10};
 
-        var margin = { top: 10, left: 10, right: 10, bottom: 10 };
-        var scores = [100, 90, 86, 35, 57, 62, 98];
-        var width = (canvas.width/curUsage.length) - (margin.left + margin.right);//Width of each bar needs to scale with canvas width
-        var currX = margin.left;// start at margin boarder
-        var spacing = 2;
-        var lineHeight = 10;
+        var maxCanvasHeight = canvas.height - (Number(margin.top) + Number(margin.bottom)) - 15,//Offset by 15
+            maxCanvasWidth = canvas.width - (margin.left + margin.right) - 15;//Offset by 15
+
+        //Set up all variable.
+        var ctx = canvas.getContext('2d'),
+            curUsage = usage.coffeeShop[0].data,
+
+            barWidth = (maxCanvasWidth / curUsage.length),//Width of each bar needs to scale with canvas barWidth
+            currX = margin.left,// start at margin boarder
+            spacing = 2,
+            lineHeight = 10,
+            i;// this should only be used for loops...
+
+        var maxBarHeight = getMaxChartValue(curUsage);
+        var barHeightOffset = (maxCanvasHeight / maxBarHeight);// Offset for scaling bar height to canvas
+
 
         console.log(curUsage);
-
-
 
         function renderLines() {
             ctx.beginPath();
@@ -36,11 +44,13 @@ angular.module('myApp.view2', ['ngRoute'])
 
         function renderBars() {
             ctx.fillStyle = '#d8838e';
-            var i;
-            for (i = 0; i < curUsage.length; i++) {
-                ctx.fillRect(currX, (canvas.height - curUsage[i].usage) - margin.bottom - lineHeight, width, scores[i]);
+            var l = curUsage.length, barHight = 0, barY = 0;
+            for (i = 0; i < l; i++) {
+                barHight = curUsage[i].usage * barHeightOffset;//tried to make this easier to read
+                barY = (canvas.height - barHight) - margin.bottom - lineHeight;//tried to make this easier to read
+                ctx.fillRect(currX, barY, barWidth, barHight);
                 renderLines();
-                currX += width + spacing;
+                currX += barWidth + spacing;
             }
             renderLines();
         }
@@ -49,11 +59,21 @@ angular.module('myApp.view2', ['ngRoute'])
         renderBars();
 
 
-        //(x,y,width, height)
+        //(x,y,barWidth, height)
 
 
         /*    ctx.fillStyle = 'orange';
          //(x,y,redius, startAngle, endAngle, antiClockwise)
          ctx.arc(300,100,80, 2 * Math.PI, false);
          ctx.fill();*/
+
+        function getMaxChartValue(chartArray) {
+            var max = 0, cur = 0, l = chartArray.length;
+            for (i = 0; i < l; i++) {
+                cur = chartArray[i].usage;
+                if (cur > max) max = cur;
+            }
+            return max;
+        }
+
     }]);
