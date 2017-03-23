@@ -76,6 +76,11 @@ angular.module('myApp.view2', ['ngRoute'])
             renderLines();
         }
 
+        function renderTimes(text) {
+            ctx.font = "30px Arial";
+            ctx.fillText("Hello World", 10, 50);
+        }
+
 
         /**
          * This draws the individual pieces of the graph in the right order
@@ -98,6 +103,31 @@ angular.module('myApp.view2', ['ngRoute'])
                 if (cur > max) max = cur;
             }
             return max;
+        }
+
+        /**
+         * This will format the time according to the graph specification.
+         * @param time
+         * @returns {*}
+         */
+        function timeFormat(time) {
+            if (time > 1259) {
+                return (time - 1200).toString().substring(0, 2) + " PM"
+            }
+
+            if (time <= 1259 && time > 1159) {
+                return time.toString().substring(0, 2) + " PM"
+            }
+
+            if (time <= 1159 && time > 959) {
+                return time.toString().substring(0, 2) + " AM"
+            }
+
+            if (time <= 59) {
+                return "12 AM"
+            }
+
+            return time.toString().substring(0, 1) + " AM"
         }
 
     }]);
