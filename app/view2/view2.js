@@ -9,17 +9,22 @@ angular.module('myApp.view2', ['ngRoute'])
         });
     }])
 
-    .controller('View2Ctrl', [function () {
+    .controller('View2Ctrl', ['usage',function (usage) {
         var canvas = $('#testCanvas')[0];//document.getElementById('testCanvas');
-        canvas.width = window.innerWidth;
+        canvas.width = window.innerWidth - 100;
         var ctx = canvas.getContext('2d');
+
+        var curUsage = usage.coffeeShop[0].data;
 
         var margin = { top: 10, left: 10, right: 10, bottom: 10 };
         var scores = [100, 90, 86, 35, 57, 62, 98];
-        var width = 50;
+        var width = (canvas.width/curUsage.length) - (margin.left + margin.right);//Width of each bar needs to scale with canvas width
         var currX = margin.left;// start at margin boarder
         var spacing = 2;
         var lineHeight = 10;
+
+        console.log(curUsage);
+
 
 
         function renderLines() {
@@ -32,8 +37,8 @@ angular.module('myApp.view2', ['ngRoute'])
         function renderBars() {
             ctx.fillStyle = '#d8838e';
             var i;
-            for (i = 0; i < scores.length; i++) {
-                ctx.fillRect(currX, (canvas.height - scores[i]) - margin.bottom - lineHeight, width, scores[i]);
+            for (i = 0; i < curUsage.length; i++) {
+                ctx.fillRect(currX, (canvas.height - curUsage[i].usage) - margin.bottom - lineHeight, width, scores[i]);
                 renderLines();
                 currX += width + spacing;
             }
