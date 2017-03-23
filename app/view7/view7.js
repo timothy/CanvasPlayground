@@ -68,7 +68,7 @@
                     maxYValue = getMaxDataYValue();
                     ratio = yMax / maxYValue;
                     //render data based upon type of renderType(s) that client supplies
-                    if (data.renderTypes == undefined || data.renderTypes == null) data.renderTypes = [renderType.lines];
+                    if (data.renderTypes === undefined || data.renderTypes === null) data.renderTypes = [renderType.lines];
                     renderParts();
                 },
 
@@ -80,7 +80,7 @@
 
 
                 renderText = function() {
-                    var labelFont = (data.labelFont != null) ? data.labelFont : '20pt Arial';
+                    var labelFont = (data.labelFont !== null) ? data.labelFont : '20pt Arial';
                     ctx.font = labelFont;
                     ctx.textAlign = "right";
 
@@ -106,14 +106,14 @@
                     var xPos = margin.left;
 
                     for (var i = 0; i < data.dataPoints.length; i++) {
-                        yPos += (i == 0) ? margin.top : yInc;
+                        yPos += (i === 0) ? margin.top : yInc;
                         //Draw horizontal lines
                         drawLine({ x: margin.left, y: yPos, x2: xMax, y2: yPos }, '#E8E8E8');
 
                         if (shouldRenderText) {
                             //y axis labels
-                            ctx.font = (data.dataPointFont != null) ? data.dataPointFont : '10pt Calibri';
-                            var txt = Math.round(maxYValue - ((i == 0) ? 0 : yPos / ratio));
+                            ctx.font = (data.dataPointFont !== null) ? data.dataPointFont : '10pt Calibri';
+                            var txt = Math.round(maxYValue - ((i === 0) ? 0 : yPos / ratio));
                             var txtSize = ctx.measureText(txt);
                             ctx.fillText(txt, margin.left - ((txtSize.width >= 14) ? txtSize.width : 10) - 7, yPos + 4);
 
@@ -163,12 +163,12 @@
 
                 renderRect = function (x, y, highlightColor) {
                     var radgrad = ctx.createRadialGradient(x, y, rectWidth, x - 5, y - 5, 0);
-                    radgrad.addColorStop(0, (highlightColor == null) ? 'Green' : highlightColor);
+                    radgrad.addColorStop(0, (highlightColor === null) ? 'Green' : highlightColor);
                     radgrad.addColorStop(0.9, 'White');
                     ctx.beginPath();
                     ctx.fillStyle = radgrad;
                     //Render circle
-                    ctx.arc(x, canvas.height - y, rectWidth, 0, 2 * Math.PI, false)
+                    ctx.arc(x, canvas.height - y, rectWidth, 0, 2 * Math.PI, false);
                     ctx.fillRect(x, y, width, scores[i]);
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = '#000';
@@ -184,7 +184,7 @@
                 },
 
             drawLine = function (pt, strokeStyle) {
-                ctx.strokeStyle = (strokeStyle == null) ? 'black' : strokeStyle;
+                ctx.strokeStyle = (strokeStyle === null) ? 'black' : strokeStyle;
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(pt.x2, pt.y2);
@@ -225,7 +225,7 @@
 
     Array.prototype.contains = function (value) {
         for (var i = 0; i < this.length; i++) {
-            if (this[i] == value) return true;
+            if (this[i] === value) return true;
         }
         return false;
     };
