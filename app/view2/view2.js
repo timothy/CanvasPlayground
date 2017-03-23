@@ -35,13 +35,34 @@ angular.module('myApp.view2', ['ngRoute'])
 
         console.log(curUsage);
 
+        /**
+         * This renders vertical lines at the (currx, Y) coordinates
+         */
         function renderLines() {
+            ctx.strokeStyle = "#d8838e";
+            ctx.lineWidth = spacing;
             ctx.beginPath();
             ctx.moveTo(currX, canvas.height - margin.bottom);
             ctx.lineTo(currX, canvas.height - lineHeight - margin.bottom);
             ctx.stroke();
         }
 
+        /**
+         * This renders one horizontal line to connect all vertical lines.
+         */
+        function renderLineConnectors() {
+            ctx.beginPath();
+            ctx.strokeStyle = "#d8838e";
+            ctx.lineWidth = spacing;
+            ctx.moveTo(margin.left, canvas.height - margin.bottom - lineHeight);
+            ctx.lineTo(currX, canvas.height - margin.bottom - lineHeight);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        /**
+         * This renders the graph bars scaled to fit the canvas window
+         */
         function renderBars() {
             ctx.fillStyle = '#d8838e';
             var l = curUsage.length, barHight = 0, barY = 0;
@@ -56,17 +77,20 @@ angular.module('myApp.view2', ['ngRoute'])
         }
 
 
-        renderBars();
+        /**
+         * This draws the individual pieces of the graph in the right order
+         */
+        !function renderAll() {
+            renderBars();
+            renderLineConnectors();
+        }();
 
 
-        //(x,y,barWidth, height)
-
-
-        /*    ctx.fillStyle = 'orange';
-         //(x,y,redius, startAngle, endAngle, antiClockwise)
-         ctx.arc(300,100,80, 2 * Math.PI, false);
-         ctx.fill();*/
-
+        /**
+         *
+         * @param chartArray - the array for the current chart
+         * @returns {number} the max usage number
+         */
         function getMaxChartValue(chartArray) {
             var max = 0, cur = 0, l = chartArray.length;
             for (i = 0; i < l; i++) {
