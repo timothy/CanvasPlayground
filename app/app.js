@@ -65,27 +65,27 @@ angular.module('myApp', [
                         "usage": 7500
                     },
                     {
-                        "time": 1801,
+                        "time": 1701,
                         "usage": 7000
                     },
                     {
-                        "time": 1901,
+                        "time": 1801,
                         "usage": 2000
                     },
                     {
-                        "time": 2001,
+                        "time": 1901,
                         "usage": 4000
                     },
                     {
-                        "time": 2101,
+                        "time": 2001,
                         "usage": 3000
                     },
                     {
-                        "time": 2201,
+                        "time": 2101,
                         "usage": 5000
                     },
                     {
-                        "time": 2301,
+                        "time": 2201,
                         "usage": 9000
                     }
                 ]

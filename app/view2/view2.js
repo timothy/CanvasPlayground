@@ -27,20 +27,25 @@ angular.module('myApp.view2', ['ngRoute'])
             currX = margin.left,// start at margin boarder
             spacing = 2,
             lineHeight = 10,
-            count = 0,
             i;// this should only be used for loops...
 
         var maxBarHeight = getMaxChartValue(curUsage);
         var barHeightOffset = (maxCanvasHeight / maxBarHeight);// Offset for scaling bar height to canvas
 
-
+        //Find the index of the element with the same hour as now.
+        var timeNow = new Date().getHours() * 100;
+        var curTimeIndex = curUsage.findIndex(function (element, index, array) {
+            return element.time >= timeNow;
+        });
+        console.log("timeNow:"+timeNow);
+        console.log("The Index for Current Time:"+curTimeIndex);
         console.log(curUsage);
 
         /**
          * This renders vertical lines at the (currx, Y) coordinates
          */
-        function renderLines() {
-            ctx.strokeStyle = "#d8838e";
+        function renderLines(color) {
+            ctx.strokeStyle = !!color ? color : "#d8838e";
             ctx.lineWidth = spacing;
             ctx.beginPath();
             ctx.moveTo(currX, canvas.height - margin.bottom);
@@ -54,14 +59,23 @@ angular.module('myApp.view2', ['ngRoute'])
          */
         function renderTimes() {//todo Needs more work...
             ctx.fillStyle = 'white';
-            var curSpacing = currX/4;
+            //var curSpacing = currX/4;
             currX = margin.left;
             ctx.font = ".8em Arial";
-            var l = curUsage.length;
+            var txt = "", l = curUsage.length, color = 'white';
+            renderLines(color);
+            ctx.fillText(timeFormat(curUsage[0].time), currX, canvas.height);
             for (i = 0; i < l; i++) {
-                ctx.fillText(timeFormat(curUsage[i].time), currX, canvas.height);
-                currX += curSpacing;
+                if (i % 4 === 0 && i !== 0 && i !== l) {
+                    txt = timeFormat(curUsage[i].time);
+                    ctx.fillText(txt, currX - (ctx.measureText(txt).width / 2), canvas.height);
+                    renderLines(color);
+                }
+
+                currX += barWidth + spacing;
             }
+            renderLines(color);
+            ctx.fillText(timeFormat(curUsage[l - 1].time), canvas.width - margin.right - ctx.measureText(txt).width - spacing - 4, canvas.height);
         }
 
         /**
@@ -88,6 +102,13 @@ angular.module('myApp.view2', ['ngRoute'])
                 barY = (canvas.height - barHight) - margin.bottom - lineHeight;//tried to make this easier to read
                 ctx.fillRect(currX, barY, barWidth, barHight);
                 renderLines();
+
+                if(curTimeIndex === i){
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(currX, barY, barWidth, barHight);
+                    ctx.fillStyle = '#d8838e';
+                }
+
                 //renderTimes(timeFormat(curUsage[i].time));
                 currX += barWidth + spacing;
             }
