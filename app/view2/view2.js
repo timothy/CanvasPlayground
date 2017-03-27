@@ -10,72 +10,105 @@ angular.module('myApp.view2', ['ngRoute'])
     }])
 
     .controller('View2Ctrl', ['usage', function (usage) {
+        //Init Canvas
         var canvas = $('#testCanvas')[0];//document.getElementById('testCanvas');
-        canvas.width = window.innerWidth - 100;
+        canvas.width = window.innerWidth - 20;
+        canvas.height = 100;
+        var ctx = canvas.getContext('2d');//context
+
+        //Set Background
+        ctx.fillStyle = "#B1081D";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        //Try to make things look a smooth as possible
+        ctx.translate(0.5, 0.5);
+        ctx.imageSmoothingEnabled = false;
 
         //style variables
-        var margin = {top: 10, left: 10, right: 10, bottom: 20};
+        var margin = {top: 5, left: 5, right: 10, bottom: 13};
+        var textStyle = "10px Open Sans";
 
-        var maxCanvasHeight = canvas.height - (Number(margin.top) + Number(margin.bottom)) - 15,//Offset by 15
-            maxCanvasWidth = canvas.width - (margin.left + margin.right) - 30;//Offset by 15
+        //Create boundaries for content to stay within
+        var widthOffset = 10;
+        var maxCanvasHeight = canvas.height - (Number(margin.top) + Number(margin.bottom)),//Offset by 15
+            maxCanvasWidth = canvas.width - (margin.left + margin.right) - widthOffset;//Offset by widthOffset
 
-        //Set up all variable.
-        var ctx = canvas.getContext('2d'),
-            curUsage = usage.coffeeShop[0].data,
+        //Get data from the service
+        var curUsage = usage.coffeeShop[0].data;
 
-            barWidth = (maxCanvasWidth / curUsage.length),//Width of each bar needs to scale with canvas barWidth
-            currX = margin.left,// start at margin boarder
-            spacing = 2,
-            lineHeight = 10,
-            i;// this should only be used for loops...
+        //Width of each bar needs to scale with canvas barWidth
+        var barWidth = Math.round(maxCanvasWidth / curUsage.length);
 
+        // start at margin boarder
+        var currX = margin.left;
+        // The spacing of each bar in the graph
+        var spacing = 1;
+        //The height of the line that separates the time from the graph
+        var lineHeight = 3;
+        // this should only be used for loops... instead of reinitializing i for each loop this is done once.
+        var i = 0, l = 0;// i === increment, l === length
+        //Find the largest bar height in order to scale all bars to the canvas height.
         var maxBarHeight = getMaxChartValue(curUsage);
-        var barHeightOffset = (maxCanvasHeight / maxBarHeight);// Offset for scaling bar height to canvas
+        // Offset for scaling bar height to canvas
+        var barHeightOffset = (maxCanvasHeight / maxBarHeight);
 
         //Find the index of the element with the same hour as now.
         var timeNow = new Date().getHours() * 100;
         var curTimeIndex = curUsage.findIndex(function (element, index, array) {
             return element.time >= timeNow;
         });
-        console.log("timeNow:"+timeNow);
-        console.log("The Index for Current Time:"+curTimeIndex);
-        console.log(curUsage);
 
         /**
          * This renders vertical lines at the (currx, Y) coordinates
          */
-        function renderLines(color) {
-            ctx.strokeStyle = !!color ? color : "#d8838e";
+        function renderLines() {
+            ctx.strokeStyle = "#d8838e";
             ctx.lineWidth = spacing;
-            ctx.beginPath();
-            ctx.moveTo(currX, canvas.height - margin.bottom);
-            ctx.lineTo(currX, canvas.height - lineHeight - margin.bottom);
-            ctx.stroke();
+            l = curUsage.length;
+            currX = margin.left;
+
+            ctx.strokeStyle = "#ffffff";
+            renderSingleLine();
+            ctx.strokeStyle = "#d8838e";
+            for (i = 0; i < l; i++) {
+                if (i % 4 === 0 && i !== 0 && i !== l) {
+                    ctx.strokeStyle = "#ffffff";
+                    renderSingleLine();
+                    ctx.strokeStyle = "#d8838e";
+                } else {
+                    renderSingleLine();
+                }
+                currX += barWidth + spacing;
+                console.log(canvas.height - lineHeight - margin.bottom +.5);
+            }
+            ctx.strokeStyle = "#ffffff";
+            renderSingleLine();
+
+            function renderSingleLine() {
+                ctx.beginPath();
+                ctx.moveTo(currX, canvas.height - margin.bottom);
+                ctx.lineTo(currX, canvas.height - lineHeight - margin.bottom);
+                ctx.stroke();
+            }
         }
 
         /**
-         *
-         * @param textTime
+         * This renders the times that are shown below the graph
          */
-        function renderTimes() {//todo Needs more work...
-            ctx.fillStyle = 'white';
-            //var curSpacing = currX/4;
+        function renderTimes() {
+            ctx.fillStyle = '#ffffff';
             currX = margin.left;
-            ctx.font = ".8em Arial";
-            var txt = "", l = curUsage.length, color = 'white';
-            renderLines(color);
-            ctx.fillText(timeFormat(curUsage[0].time), currX, canvas.height);
+            ctx.font = textStyle;
+            var txt = "", l = curUsage.length, hOffset = 4;
+            ctx.fillText(timeFormat(curUsage[0].time), currX, canvas.height- hOffset);
             for (i = 0; i < l; i++) {
                 if (i % 4 === 0 && i !== 0 && i !== l) {
                     txt = timeFormat(curUsage[i].time);
-                    ctx.fillText(txt, currX - (ctx.measureText(txt).width / 2), canvas.height);
-                    renderLines(color);
+                    ctx.fillText(txt, currX - Math.floor(ctx.measureText(txt).width / 2), canvas.height - hOffset);
                 }
-
                 currX += barWidth + spacing;
             }
-            renderLines(color);
-            ctx.fillText(timeFormat(curUsage[l - 1].time), canvas.width - margin.right - ctx.measureText(txt).width - spacing - 4, canvas.height);
+            ctx.fillText(timeFormat(curUsage[l - 1].time), ((canvas.width - ctx.measureText(txt).width) - spacing) - widthOffset, canvas.height- hOffset);
         }
 
         /**
@@ -96,23 +129,22 @@ angular.module('myApp.view2', ['ngRoute'])
          */
         function renderBars() {
             ctx.fillStyle = '#d8838e';
+            currX = margin.left;
             var l = curUsage.length, barHight = 0, barY = 0;
             for (i = 0; i < l; i++) {
                 barHight = curUsage[i].usage * barHeightOffset;//tried to make this easier to read
                 barY = (canvas.height - barHight) - margin.bottom - lineHeight;//tried to make this easier to read
-                ctx.fillRect(currX, barY, barWidth, barHight);
-                renderLines();
 
-                if(curTimeIndex === i){
+                if (curTimeIndex === i) {
                     ctx.fillStyle = 'white';
                     ctx.fillRect(currX, barY, barWidth, barHight);
                     ctx.fillStyle = '#d8838e';
+                } else {
+                    ctx.fillRect(currX, barY, barWidth, barHight);
                 }
-
-                //renderTimes(timeFormat(curUsage[i].time));
                 currX += barWidth + spacing;
             }
-            renderLines();
+            renderLineConnectors();
         }
 
 
@@ -121,8 +153,8 @@ angular.module('myApp.view2', ['ngRoute'])
          */
         !function renderAll() {
             renderBars();
-            renderLineConnectors();
             renderTimes();
+            renderLines();
         }();
 
 
