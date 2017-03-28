@@ -55,6 +55,8 @@ function Graph(canvas, data, style) {
     /**
      * This variables Need to be exposed. This allows consumer to customize if desired.
      */
+    //Set Graph data
+    self.graphData = data;
     //Init Canvas
     self.canvas = $('#' + canvas)[0];//document.getElementById(canvas);
     self.canvas.width = window.innerWidth - 20;
@@ -73,7 +75,7 @@ function Graph(canvas, data, style) {
      * style variables
      */
     //Graph margins
-    self.margin = !!style.margin ? style.margin : {top: 5, left: 5, right: 10, bottom: 13};
+    self.margin = !!style.margin ? style.margin : {top: 5, left: 5, right: 5, bottom: 13};
     //Text size and font
     self.textStyle = !!style.textProperties ? style.textProperties : "10px Open Sans";
     // The spacing of each bar in the graph
@@ -82,15 +84,13 @@ function Graph(canvas, data, style) {
     self.lineHeight = !!style.lineHeight ? style.lineHeight : 3;
 
     //Create boundaries for content to stay within
-    self.widthOffset = 10;
-    self.maxCanvasHeight = self.canvas.height - (Number(self.margin.top) + Number(self.margin.bottom));//Offset by 15
+    self.widthOffset = (self.graphData.length * self.spacing);
+    self.maxCanvasHeight = self.canvas.height - (Number(self.margin.top) + Number(self.margin.bottom));
     self.maxCanvasWidth = self.canvas.width - (self.margin.left + self.margin.right) - self.widthOffset;//Offset by widthOffset
 
-    //Set Graph data
-    self.graphData = data;
 
     //Width of each bar needs to scale with canvas barWidth
-    self.barWidth = Math.round(self.maxCanvasWidth / self.graphData.length);
+    self.barWidth = self.maxCanvasWidth / self.graphData.length;
 
     // start at margin boarder
     self.currX = self.margin.left;
@@ -118,8 +118,8 @@ Graph.prototype.render = function () {
     var self = this;
 
     renderBars(self);
-    renderTimes(self);
     renderLines(self);
+    renderTimes(self);
 };
 
 /**
@@ -184,11 +184,11 @@ function renderTimes(self) {
     for (i = 0; i < l; i++) {
         if (i % 4 === 0 && i !== 0 && i !== l) {
             txt = self.timeFormat(self.graphData[i].time);
-            self.ctx.fillText(txt, currX - Math.floor(self.ctx.measureText(txt).width / 2), self.canvas.height - hOffset);
+            self.ctx.fillText(txt, currX - self.ctx.measureText(txt).width / 2, self.canvas.height - hOffset);
         }
         currX += self.barWidth + self.spacing;
     }
-    self.ctx.fillText(self.timeFormat(self.graphData[l - 1].time), ((self.canvas.width - self.ctx.measureText(txt).width) - self.spacing) - self.widthOffset, self.canvas.height - hOffset);
+    self.ctx.fillText(self.timeFormat(self.graphData[l - 1].time), ((self.lastLine - self.ctx.measureText(txt).width) - self.spacing) - self.margin.right, self.canvas.height - hOffset);
 }
 
 
@@ -214,6 +214,7 @@ function renderLines(self) {
         }
         currX += self.barWidth + self.spacing;
     }
+    self.lastLine = currX;
     self.ctx.strokeStyle = "#ffffff";
     renderSingleLine();
 
