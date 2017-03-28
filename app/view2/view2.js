@@ -8,11 +8,12 @@ angular.module('myApp.view2', ['ngRoute'])
             controller: 'View2Ctrl'
         });
     }])
-
     .controller('View2Ctrl', ['usage', 'graph', function (usage, graph) {
 
         //Render Graph
         graph.getGraph('testCanvas', usage.coffeeShop[0].data, false).render();
+
+        graph.getGraph('testCanvas2', usage.coffeeShop[2].data, false).render();
 
     }]).factory('graph', graphFactory);
 
