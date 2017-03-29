@@ -8,29 +8,40 @@ angular.module('myApp.view2', ['ngRoute'])
             controller: 'View2Ctrl'
         });
     }])
-    .controller('View2Ctrl', ['usage', 'graph', function (usage, graph) {
+    .controller('View2Ctrl', ['usage', 'graph', '$scope', function (usage, graph, $scope) {
 
         /**
          * Render Graph - with default style
          * data should always be an array of objects with
          * two properties usage and time i.e. {usage:number, time:number}
          */
-        graph.getGraph('testCanvas', usage.coffeeShop[0].data, false).render();
+      var graph1 =  graph.getGraph('testCanvas', usage.coffeeShop[0].data, false);
 
-        //Set style example
+        //Set custom styles example
         var style = {
+            canvasWidth: window.innerWidth / 2,
+            canvasHeight: 50,
             background: "blue",
-            margin:{top: 10, left: 10, right: 10, bottom: 15},
-            textStyle:"15px Open Sans",
-            texColor:"black",
-            spacing:5,
-            lineHeight:5,
-            barColor:"green",
-            selectBarColor:"orange",
-            lineColor:"pink",
-            selectLineColor:"purple"
+            margin: {top: 10, left: 10, right: 10, bottom: 15},
+            textStyle: "15px Open Sans",
+            texColor: "black",
+            spacing: 5,
+            lineHeight: 5,
+            barColor: "green",
+            selectBarColor: "orange",
+            lineColor: "pink",
+            selectLineColor: "purple"
         };
-        graph.getGraph('testCanvas2', usage.coffeeShop[2].data, style).render();
+      var graph2 =  graph.getGraph('testCanvas2', usage.coffeeShop[2].data, style);
+
+        /**
+         * If using in SPA need to destroy watchers each time routing happens
+         * Destroy on navigation change
+         */
+        $scope.$on('$destroy', function () {
+            graph1.onDestroy();
+            graph2.onDestroy();
+        });
 
     }]).factory('graph', graphFactory);
 
@@ -73,67 +84,73 @@ function Graph(canvas, data, style) {
     /**
      * Setup canvas and add graph data
      */
-    //Set Graph data
-    self.graphData = data;
-    //Init Canvas
-    self.canvas = $('#' + canvas)[0];//document.getElementById(canvas);
-    self.canvas.width = window.innerWidth - 20;
-    self.canvas.height = 100;
-    self.ctx = self.canvas.getContext('2d');//context
+    self.canvasSetup = function () {
+        //Set Graph data
+        self.graphData = data;
+        //Init Canvas
+        self.canvas = !!$ ? $('#' + canvas)[0] : document.getElementById(canvas);//If jQuery is undefined fall back to native
+        self.canvas.width = !!style.canvasWidth ? style.canvasWidth : (!!$ ? $('#' + canvas).parent().width() : document.getElementById(canvas).parentElement.clientWidth);//If jQuery is undefined fall back to native
+        self.canvas.height = !!style.canvasHeight ? style.canvasHeight : 100;
+        self.ctx = self.canvas.getContext('2d');//context
 
-    //Set Background
-    self.ctx.fillStyle = !!style.background ? style.background : "#B1081D";
-    self.ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
+        //Set Background
+        self.ctx.fillStyle = !!style.background ? style.background : "#B1081D";
+        self.ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
 
-    //Try to make things look a smooth as possible
-    self.ctx.translate(0.5, 0.5);
-    self.ctx.imageSmoothingEnabled = false;
+        //Try to make things look a smooth as possible
+        self.ctx.translate(0.5, 0.5);
+        self.ctx.imageSmoothingEnabled = false;
 
-    /**
-     * style variables v
-     */
-    //Graph margins
-    self.margin = !!style.margin ? style.margin : {top: 5, left: 5, right: 5, bottom: 13};
-    //Text size and font
-    self.textStyle = !!style.textStyle ? style.textStyle : "10px Open Sans";
-    self.texColor = !!style.texColor ? style.texColor : "#ffffff";
-    //The spacing of each bar and line in the graph
-    self.spacing = !!style.spacing ? style.spacing : 1;
-    //The height of the line that separates the time from the graph
-    self.lineHeight = !!style.lineHeight ? style.lineHeight : 3;
-    //Graph bar Styles
-    self.barColor = !!style.barColor ? style.barColor : "#d8838e";
-    self.selectBarColor = !!style.selectBarColor ? style.selectBarColor : "#ffffff";
-    //Line styles
-    self.lineColor = !!style.lineColor ? style.lineColor : "#d8838e";
-    self.selectLineColor = !!style.selectLineColor ? style.selectLineColor : "#ffffff";
-    /**
-     * style variables ^
-     */
+        /**
+         * style variables v
+         */
+        //Graph margins
+        self.margin = !!style.margin ? style.margin : {top: 5, left: 5, right: 5, bottom: 13};
+        //Text size and font
+        self.textStyle = !!style.textStyle ? style.textStyle : "10px Open Sans";
+        self.texColor = !!style.texColor ? style.texColor : "#ffffff";
+        //The spacing of each bar and line in the graph
+        self.spacing = !!style.spacing ? style.spacing : 1;
+        //The height of the line that separates the time from the graph
+        self.lineHeight = !!style.lineHeight ? style.lineHeight : 3;
+        //Graph bar Styles
+        self.barColor = !!style.barColor ? style.barColor : "#d8838e";
+        self.selectBarColor = !!style.selectBarColor ? style.selectBarColor : "#ffffff";
+        //Line styles
+        self.lineColor = !!style.lineColor ? style.lineColor : "#d8838e";
+        self.selectLineColor = !!style.selectLineColor ? style.selectLineColor : "#ffffff";
+        /**
+         * style variables ^
+         */
 
+        //Create boundaries for content to stay within
+        self.widthOffset = (self.graphData.length * self.spacing);
+        self.maxCanvasHeight = self.canvas.height - (Number(self.margin.top) + Number(self.margin.bottom));
+        self.maxCanvasWidth = self.canvas.width - (self.margin.left + self.margin.right) - self.widthOffset;//Offset by widthOffset
 
-    //Create boundaries for content to stay within
-    self.widthOffset = (self.graphData.length * self.spacing);
-    self.maxCanvasHeight = self.canvas.height - (Number(self.margin.top) + Number(self.margin.bottom));
-    self.maxCanvasWidth = self.canvas.width - (self.margin.left + self.margin.right) - self.widthOffset;//Offset by widthOffset
+        //Width of each bar needs to scale with canvas barWidth
+        self.barWidth = self.maxCanvasWidth / self.graphData.length;
 
-    //Width of each bar needs to scale with canvas barWidth
-    self.barWidth = self.maxCanvasWidth / self.graphData.length;
+        // start at margin boarder
+        self.currX = self.margin.left;
 
-    // start at margin boarder
-    self.currX = self.margin.left;
+        //Find the largest bar height in order to scale all bars to the canvas height.
+        self.maxBarHeight = self.getMaxChartValue(self.graphData);
+        // Offset for scaling bar height to canvas
+        self.barHeightOffset = (self.maxCanvasHeight / self.maxBarHeight);
 
-    //Find the largest bar height in order to scale all bars to the canvas height.
-    self.maxBarHeight = self.getMaxChartValue(self.graphData);
-    // Offset for scaling bar height to canvas
-    self.barHeightOffset = (self.maxCanvasHeight / self.maxBarHeight);
+        //Find the index of the element with the same hour as now.
+        self.timeNow = new Date().getHours() * 100;
+        self.curTimeIndex = self.graphData.findIndex(function (element, index, array) {
+            return element.time >= self.timeNow;
+        });
 
-    //Find the index of the element with the same hour as now.
-    self.timeNow = new Date().getHours() * 100;
-    self.curTimeIndex = self.graphData.findIndex(function (element, index, array) {
-        return element.time >= self.timeNow;
-    });
+        self.render();
+    };
 
+    self.canvasSetup();
+
+    window.addEventListener('resize', self.canvasSetup);
 }
 
 /**
@@ -146,6 +163,12 @@ Graph.prototype.render = function () {
     renderBars(self);
     renderLines(self);
     renderTimes(self);
+};
+
+Graph.prototype.onDestroy = function () {
+    var self = this;
+
+    window.removeEventListener("resize", self.canvasSetup);
 };
 
 /**
