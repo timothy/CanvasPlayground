@@ -207,7 +207,7 @@ function renderTimes(self) {
     self.ctx.fillText(self.timeFormat(self.graphData[0].time), currX, self.canvas.height - hOffset);
     //Only want times every 4th position.
     for (i = 0; i < l; i++) {
-        if (i % 4 === 0 && i !== 0 && i !== l) {
+        if (i % 4 === 0 && i !== 0) {
             txt = self.timeFormat(self.graphData[i].time);
             self.ctx.fillText(txt, currX - self.ctx.measureText(txt).width / 2, self.canvas.height - hOffset);
         }
@@ -223,7 +223,7 @@ function renderTimes(self) {
  */
 function renderLines(self) {
     var i, l = self.graphData.length;// i === increment, l === length
-    var currX = self.margin.left;
+    var currX = self.margin.left - (self.spacing / 2);
 
     self.ctx.lineWidth = self.spacing;
     self.ctx.strokeStyle = self.selectLineColor;
