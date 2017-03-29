@@ -10,10 +10,27 @@ angular.module('myApp.view2', ['ngRoute'])
     }])
     .controller('View2Ctrl', ['usage', 'graph', function (usage, graph) {
 
-        //Render Graph
+        /**
+         * Render Graph - with default style
+         * data should always be an array of objects with
+         * two properties usage and time i.e. {usage:number, time:number}
+         */
         graph.getGraph('testCanvas', usage.coffeeShop[0].data, false).render();
 
-        graph.getGraph('testCanvas2', usage.coffeeShop[2].data, false).render();
+        //Set style example
+        var style = {
+            background: "blue",
+            margin:{top: 10, left: 10, right: 10, bottom: 15},
+            textStyle:"15px Open Sans",
+            texColor:"black",
+            spacing:5,
+            lineHeight:5,
+            barColor:"green",
+            selectBarColor:"orange",
+            lineColor:"pink",
+            selectLineColor:"purple"
+        };
+        graph.getGraph('testCanvas2', usage.coffeeShop[2].data, style).render();
 
     }]).factory('graph', graphFactory);
 
@@ -54,7 +71,7 @@ function Graph(canvas, data, style) {
     var self = this;
 
     /**
-     * This variables Need to be exposed. This allows consumer to customize if desired.
+     * Setup canvas and add graph data
      */
     //Set Graph data
     self.graphData = data;
@@ -73,22 +90,32 @@ function Graph(canvas, data, style) {
     self.ctx.imageSmoothingEnabled = false;
 
     /**
-     * style variables
+     * style variables v
      */
     //Graph margins
     self.margin = !!style.margin ? style.margin : {top: 5, left: 5, right: 5, bottom: 13};
     //Text size and font
-    self.textStyle = !!style.textProperties ? style.textProperties : "10px Open Sans";
-    // The spacing of each bar in the graph
+    self.textStyle = !!style.textStyle ? style.textStyle : "10px Open Sans";
+    self.texColor = !!style.texColor ? style.texColor : "#ffffff";
+    //The spacing of each bar and line in the graph
     self.spacing = !!style.spacing ? style.spacing : 1;
     //The height of the line that separates the time from the graph
     self.lineHeight = !!style.lineHeight ? style.lineHeight : 3;
+    //Graph bar Styles
+    self.barColor = !!style.barColor ? style.barColor : "#d8838e";
+    self.selectBarColor = !!style.selectBarColor ? style.selectBarColor : "#ffffff";
+    //Line styles
+    self.lineColor = !!style.lineColor ? style.lineColor : "#d8838e";
+    self.selectLineColor = !!style.selectLineColor ? style.selectLineColor : "#ffffff";
+    /**
+     * style variables ^
+     */
+
 
     //Create boundaries for content to stay within
     self.widthOffset = (self.graphData.length * self.spacing);
     self.maxCanvasHeight = self.canvas.height - (Number(self.margin.top) + Number(self.margin.bottom));
     self.maxCanvasWidth = self.canvas.width - (self.margin.left + self.margin.right) - self.widthOffset;//Offset by widthOffset
-
 
     //Width of each bar needs to scale with canvas barWidth
     self.barWidth = self.maxCanvasWidth / self.graphData.length;
@@ -107,8 +134,6 @@ function Graph(canvas, data, style) {
         return element.time >= self.timeNow;
     });
 
-
-    self.data = data;
 }
 
 /**
@@ -176,11 +201,10 @@ function renderTimes(self) {
     var currX = self.margin.left;
     var txt = "", l = self.graphData.length, hOffset = 4, i;
 
-    self.ctx.fillStyle = '#ffffff';
+    self.ctx.fillStyle = self.texColor;
     self.ctx.font = self.textStyle;
 
     self.ctx.fillText(self.timeFormat(self.graphData[0].time), currX, self.canvas.height - hOffset);
-
     //Only want times every 4th position.
     for (i = 0; i < l; i++) {
         if (i % 4 === 0 && i !== 0 && i !== l) {
@@ -189,7 +213,8 @@ function renderTimes(self) {
         }
         currX += self.barWidth + self.spacing;
     }
-    self.ctx.fillText(self.timeFormat(self.graphData[l - 1].time), ((self.lastLine - self.ctx.measureText(txt).width) - self.spacing) - self.margin.right, self.canvas.height - hOffset);
+    self.ctx.textAlign = "right";
+    self.ctx.fillText(self.timeFormat(self.graphData[l - 1].time), self.lastLine, self.canvas.height - hOffset);
 }
 
 
@@ -200,23 +225,22 @@ function renderLines(self) {
     var i, l = self.graphData.length;// i === increment, l === length
     var currX = self.margin.left;
 
-    self.ctx.strokeStyle = "#d8838e";
     self.ctx.lineWidth = self.spacing;
-    self.ctx.strokeStyle = "#ffffff";
+    self.ctx.strokeStyle = self.selectLineColor;
     renderSingleLine();
-    self.ctx.strokeStyle = "#d8838e";
+    self.ctx.strokeStyle = self.lineColor;
     for (i = 0; i < l; i++) {
-        if (i % 4 === 0 && i !== 0 && i !== l) {
-            self.ctx.strokeStyle = "#ffffff";
+        if (i % 4 === 0 || i === 0) {
+            self.ctx.strokeStyle = self.selectLineColor;
             renderSingleLine();
-            self.ctx.strokeStyle = "#d8838e";
+            self.ctx.strokeStyle = self.lineColor;
         } else {
             renderSingleLine();
         }
         currX += self.barWidth + self.spacing;
     }
     self.lastLine = currX;
-    self.ctx.strokeStyle = "#ffffff";
+    self.ctx.strokeStyle = self.selectLineColor;
     renderSingleLine();
 
     /**
@@ -237,15 +261,15 @@ function renderBars(self) {
     var currX = self.margin.left;
     var l = self.graphData.length, barHight = 0, barY = 0, i;
 
-    self.ctx.fillStyle = '#d8838e';
+    self.ctx.fillStyle = self.barColor;
     for (i = 0; i < l; i++) {
         barHight = self.graphData[i].usage * self.barHeightOffset;//tried to make this easier to read
         barY = (self.canvas.height - barHight) - self.margin.bottom - self.lineHeight;//tried to make this easier to read
 
         if (self.curTimeIndex === i) {
-            self.ctx.fillStyle = 'white';
+            self.ctx.fillStyle = self.selectBarColor;
             self.ctx.fillRect(currX, barY, self.barWidth, barHight);
-            self.ctx.fillStyle = '#d8838e';
+            self.ctx.fillStyle = self.barColor;
         } else {
             self.ctx.fillRect(currX, barY, self.barWidth, barHight);
         }
@@ -259,7 +283,7 @@ function renderBars(self) {
  */
 function renderLineConnectors(self) {
     self.ctx.beginPath();
-    self.ctx.strokeStyle = "#d8838e";
+    self.ctx.strokeStyle = self.lineColor;
     self.ctx.lineWidth = self.spacing;
     self.ctx.moveTo(self.margin.left, self.canvas.height - self.margin.bottom - self.lineHeight);
     self.ctx.lineTo(self.currX, self.canvas.height - self.margin.bottom - self.lineHeight);
