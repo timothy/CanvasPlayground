@@ -2,7 +2,7 @@
 
 ## About
 This app is something I am building to help me learn how to work with HTML5 Canvas. I am using Angular to help organize my test code.
-The bulk of my work is done [here!](https://github.com/timothy/CanvasPlayground/tree/master/app/view2)
+The bulk of my work is done [here!](https://github.com/timothy/CanvasPlayground/blob/master/app/view2/view2.js)
 
 ### Install Dependencies
 
